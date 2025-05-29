@@ -14,7 +14,6 @@ spec:
       labels:
         app: morpheus-feedback-api
     spec:
-      serviceAccountName: argilla
       imagePullSecrets:
         - name: morpheus-pull-secret
       containers:
@@ -38,6 +37,10 @@ spec:
               value: argilla
             - name: PASSWORD
               value: "12345678"
+            - name: API_KEY
+              value: argilla.apikey
+            - name: WORKSPACE
+              value: default
           envFrom:
             - configMapRef:
                 name: argilla-config
@@ -85,3 +88,34 @@ spec:
               value: postgres
             - name: POSTGRES_DB
               value: argilla
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: argilla
+  labels:
+    app: morpheus-feedback-api
+spec:
+  selector:
+    app: morpheus-feedback-api
+  ports:
+    - protocol: TCP
+      port: 6900
+      targetPort: 6900
+  type: ClusterIP
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: argilla
+  annotations:
+    haproxy.router.openshift.io/timeout: 5m
+spec:
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  port:
+    targetPort: 6900
+  to:
+    kind: Service
+    name: argilla

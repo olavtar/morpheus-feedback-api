@@ -11,24 +11,14 @@ def init_argilla(app):
     print("Initializing Argilla SDK...")
 
     app.argilla_client = rg.Argilla(
-        api_url=app.config['ARGILLA_API_URL'],
+        api_url=app.config['ARGILLA_URL'],
         api_key=app.config['ARGILLA_API_KEY'],
     )
     print("Done Initializing Argilla SDK...")
 
 
 def process_feedback(data):
-    """
-    Submits feedback data as a rg.Record to the configured Argilla dataset,
-    auto-creating the dataset if it does not exist.
-    Postman test:localhost:5001/api/feedback
-    {
-    "response": "Testing feedback via Postman",
-    "thumbs": "👍",
-    "rating": "5",
-    "comment": "Everything looks good!"
-    }
-    """
+
     try:
         client = current_app.argilla_client
         ws = current_app.config['ARGILLA_WORKSPACE']
@@ -43,8 +33,7 @@ def process_feedback(data):
                 "data": data
             }
 
-        # 2) Ensure Metadata is Set Correctly
-        # metadata = data.get("metadata", {})
+        # 2) Get report_id
         report_id = data.get("reportId")
 
         print(f"Logging feedback with id: {report_id}")
